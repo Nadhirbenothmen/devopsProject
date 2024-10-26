@@ -113,10 +113,7 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                    <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
-                </configuration>
+
             </plugin>
 
 
