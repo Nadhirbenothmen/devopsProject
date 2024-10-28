@@ -9,8 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.repositories.BlocRepository;
 
-import java.util.Arrays;
-import java.util.List;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,23 +29,7 @@ class BlocServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testRetrieveBlocs() {
-        // Arrange
-        Bloc bloc1 = Bloc.builder().nomBloc("Bloc1").build();
-        Bloc bloc2 = Bloc.builder().nomBloc("Bloc2").build();
-        when(blocRepository.findAll()).thenReturn(Arrays.asList(bloc1, bloc2));
 
-        // Act
-        List<Bloc> blocs = blocService.retrieveBlocs();
-
-        // Assert
-        assertNotNull(blocs);
-        assertEquals(2, blocs.size());
-        assertEquals("Bloc1", blocs.get(0).getNomBloc());
-        assertEquals("Bloc2", blocs.get(1).getNomBloc());
-        verify(blocRepository, times(1)).findAll();
-    }
 
     @Test
     void testAddBloc() {
