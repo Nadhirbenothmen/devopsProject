@@ -107,11 +107,10 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- JaCoCo for Code Coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.8</version> <!-- Utilisez la dernière version stable -->
                 <executions>
                     <execution>
                         <goals>
@@ -126,10 +125,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                    <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
-                </configuration>
             </plugin>
 
 
