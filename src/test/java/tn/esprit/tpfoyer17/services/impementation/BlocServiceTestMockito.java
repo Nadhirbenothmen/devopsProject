@@ -20,28 +20,28 @@ import static org.mockito.Mockito.*;
 
 class BlocServiceTestMockito {
     @Mock
-    BlocRepository blocRepository;
+    private BlocRepository blocRepository;
 
     @InjectMocks
-    BlocService blocService;
+    private BlocService blocService;
 
-    Bloc bloc;
+    private Bloc bloc;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        Foyer foyer = Foyer.builder()
+        Foyer foyer = Foyer.builder() // Ensure the builder is set up correctly
                 .idFoyer(1L)
                 .nomFoyer("Foyer A")
                 .capaciteFoyer(300L)
                 .build();
 
-        bloc = Bloc.builder()
+        bloc = Bloc.builder() // Ensure the builder is set up correctly
                 .idBloc(1L)
                 .nomBloc("Bloc A")
                 .capaciteBloc(100L)
                 .foyer(foyer)
-                .chambres(Set.of()) // Utiliser un ensemble vide pour simplifier le test
+                .chambres(Set.of()) // Use an empty set to simplify the test
                 .build();
     }
 
@@ -124,4 +124,6 @@ class BlocServiceTestMockito {
         assertEquals("Bloc A", result.getNomBloc());
         verify(blocRepository, times(1)).findByChambresIdChambre(1L);
     }
+
+    // Additional tests can be added here for edge cases
 }
