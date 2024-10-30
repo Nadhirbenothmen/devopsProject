@@ -40,17 +40,4 @@ public class Bloc implements Serializable {
     Set<Chambre> chambres;
 
 
-    public void setNom(String blocA) {
-    }
-
-    public String getNom() {
-        return null;
-    }
-
-    public void setId(long l) {
-    }
-
-    public long getId() {
-        return 0;
-    }
 }
