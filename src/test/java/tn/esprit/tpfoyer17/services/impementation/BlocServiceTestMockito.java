@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.repositories.BlocRepository;
+import tn.esprit.tpfoyer17.repositories.FoyerRepository; // Assuming this repository exists
 import tn.esprit.tpfoyer17.services.impementations.BlocService;
 
 import java.util.ArrayList;
@@ -20,28 +21,37 @@ import static org.mockito.Mockito.*;
 
 class BlocServiceTestMockito {
     @Mock
-    private BlocRepository blocRepository;
+    BlocRepository blocRepository;
+
+    @Mock
+    FoyerRepository foyerRepository; // Mock for Foyer repository
 
     @InjectMocks
-    private BlocService blocService;
+    BlocService blocService;
 
-    private Bloc bloc;
+    Bloc bloc;
+    Foyer foyer;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        Foyer foyer = Foyer.builder() // Ensure the builder is set up correctly
+
+        // Create and save the foyer before associating it with the bloc
+        foyer = Foyer.builder()
                 .idFoyer(1L)
                 .nomFoyer("Foyer A")
                 .capaciteFoyer(300L)
                 .build();
 
-        bloc = Bloc.builder() // Ensure the builder is set up correctly
+        // Mock the FoyerRepository save method
+        when(foyerRepository.save(foyer)).thenReturn(foyer);
+
+        bloc = Bloc.builder()
                 .idBloc(1L)
                 .nomBloc("Bloc A")
                 .capaciteBloc(100L)
                 .foyer(foyer)
-                .chambres(Set.of()) // Use an empty set to simplify the test
+                .chambres(Set.of()) // Use an empty set for simplicity
                 .build();
     }
 
@@ -124,6 +134,4 @@ class BlocServiceTestMockito {
         assertEquals("Bloc A", result.getNomBloc());
         verify(blocRepository, times(1)).findByChambresIdChambre(1L);
     }
-
-    // Additional tests can be added here for edge cases
 }
