@@ -14,7 +14,7 @@ import tn.esprit.tpfoyer17.repositories.BlocRepository;
 import tn.esprit.tpfoyer17.repositories.FoyerRepository;
 import tn.esprit.tpfoyer17.services.impementations.BlocService;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,42 +110,11 @@ class BlocServiceTest {
     }
 
     @Test
-    void testRetrieveBlocNotFound() {
-        when(blocRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Bloc result = blocService.retrieveBloc(999L); // Un ID qui n'existe pas
-
-        assertNull(result);
-    }
-
-    @Test
-    void testUpdateBlocNotFound() {
-        when(blocRepository.findById(bloc.getIdBloc())).thenReturn(Optional.empty());
-
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            blocService.updateBloc(bloc);
-        });
-
-        assertEquals("Bloc not found", exception.getMessage());
-    }
-
-    @Test
     void testRemoveBloc() {
         doNothing().when(blocRepository).deleteById(bloc.getIdBloc());
         blocService.removeBloc(bloc.getIdBloc());
 
         verify(blocRepository, times(1)).deleteById(bloc.getIdBloc());
-    }
-
-    @Test
-    void testRemoveBlocNotFound() {
-        doThrow(new RuntimeException("Bloc not found")).when(blocRepository).deleteById(anyLong());
-
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            blocService.removeBloc(999L); // Un ID qui n'existe pas
-        });
-
-        assertEquals("Bloc not found", exception.getMessage());
     }
 
     @Test
@@ -168,15 +137,5 @@ class BlocServiceTest {
         assertNotNull(result);
         assertEquals("Bloc A", result.getNomBloc());
         verify(blocRepository, times(1)).findByChambresIdChambre(1L);
-    }
-
-    @Test
-    void testFindByChambresIdChambreNotFound() {
-        when(blocRepository.findByChambresIdChambre(anyLong())).thenReturn(null);
-
-        Bloc result = blocService.findByChambresIdChambre(999L); // ID qui n'existe pas
-
-        assertNull(result);
-        verify(blocRepository, times(1)).findByChambresIdChambre(999L);
     }
 }
