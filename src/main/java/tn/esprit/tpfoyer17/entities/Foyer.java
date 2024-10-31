@@ -37,6 +37,4 @@ public class Foyer implements Serializable {
     @OneToMany(mappedBy = "foyer", cascade = CascadeType.ALL)
     Set<Bloc> blocs;
 
-
-
 }
