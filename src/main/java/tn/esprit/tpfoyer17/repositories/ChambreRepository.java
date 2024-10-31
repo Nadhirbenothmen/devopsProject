@@ -18,16 +18,6 @@ public interface ChambreRepository extends CrudRepository<Chambre, Long> {
 
 
 
-        List<Chambre> findByBlocId(Long idBloc); // Ajoutez cette méthode
-
-
-
-
-
-
-
-
-
 
 
 

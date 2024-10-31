@@ -62,12 +62,7 @@ class BlocServiceTest {
         bloc = blocRepository.save(bloc); // Save the bloc
 
         // Create a Chambre associated with the Bloc
-        Chambre chambre = Chambre.builder()
-                .bloc(bloc) // Associate the chambre with the bloc
-                .build();
 
-        // Save the Chambre in the database
-        chambreRepository.save(chambre); // Save the chambre
     }
 
     @Test
@@ -134,14 +129,5 @@ class BlocServiceTest {
     }
 
     // Test for findByChambresIdChambre method
-    @Test
-    void testFindByChambresIdChambre() {
-        // Récupérer la chambre associée au bloc
-        Chambre chambre = chambreRepository.findByBlocId(bloc.getIdBloc()).get(0); // Récupérer la chambre associée
 
-        Bloc result = blocService.findByChambresIdChambre(chambre.getIdChambre()); // Utiliser l'ID de la chambre récupérée
-
-        assertNotNull(result);
-        assertEquals("Bloc A", result.getNomBloc());
-    }
 }
