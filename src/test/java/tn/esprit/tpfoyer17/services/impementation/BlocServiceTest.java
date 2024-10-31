@@ -1,4 +1,4 @@
-package tn.esprit.tpfoyer17.services.implementation;
+package tn.esprit.tpfoyer17.services.impementation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.repositories.BlocRepository;
+import tn.esprit.tpfoyer17.repositories.FoyerRepository; // Ensure you import the FoyerRepository
 import tn.esprit.tpfoyer17.services.impementations.BlocService;
 
 import java.util.List;
@@ -16,11 +17,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest // Lance une instance complète du contexte Spring
+@SpringBootTest // Launch a complete instance of the Spring context
 class BlocServiceTest {
 
     @Autowired
     private BlocRepository blocRepository;
+
+    @Autowired
+    private FoyerRepository foyerRepository; // Add this line to inject the foyer repository
 
     @Autowired
     private BlocService blocService;
@@ -29,20 +33,23 @@ class BlocServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Initialiser un Foyer et un Bloc pour le test
+        // Initialize a Foyer and save it to the database
         Foyer foyer = Foyer.builder()
                 .nomFoyer("Foyer A")
                 .capaciteFoyer(300)
                 .build();
 
+        foyer = foyerRepository.save(foyer); // Save the foyer first
+
+        // Initialize the Bloc with the saved foyer
         bloc = Bloc.builder()
                 .nomBloc("Bloc A")
                 .capaciteBloc(100)
-                .foyer(foyer)
+                .foyer(foyer) // Use the saved foyer
                 .build();
 
-        // Sauvegarder les entités dans la base de données H2 en mémoire
-        blocRepository.save(bloc);
+        // Save the Bloc in the database
+        bloc = blocRepository.save(bloc); // Save the bloc
     }
 
     @Test
