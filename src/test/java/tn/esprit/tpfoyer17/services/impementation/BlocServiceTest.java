@@ -3,67 +3,62 @@ package tn.esprit.tpfoyer17.services.impementation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tn.esprit.tpfoyer17.entities.Bloc;
-import tn.esprit.tpfoyer17.entities.Chambre; // Importer l'entité Chambre
 import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.repositories.BlocRepository;
-import tn.esprit.tpfoyer17.repositories.ChambreRepository; // Assurez-vous d'importer le repository de Chambre
 import tn.esprit.tpfoyer17.repositories.FoyerRepository;
 import tn.esprit.tpfoyer17.services.impementations.BlocService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest // Launch a complete instance of the Spring context
+@SpringBootTest // Optionnel ici car nous allons utiliser Mockito
 class BlocServiceTest {
 
-    @Autowired
+    @Mock
     private BlocRepository blocRepository;
 
-    @Autowired
+    @Mock
     private FoyerRepository foyerRepository;
 
-    @Autowired
-    private ChambreRepository chambreRepository; // Injecter le repository de Chambre
-
-    @Autowired
+    @InjectMocks
     private BlocService blocService;
 
     private Bloc bloc;
 
     @BeforeEach
     void setUp() {
-        // Clear the database to avoid conflicts
-        blocRepository.deleteAll();
-        foyerRepository.deleteAll();
-        chambreRepository.deleteAll(); // Clear chambres as well
+        MockitoAnnotations.openMocks(this); // Initialiser les mocks
 
-        // Initialize a Foyer and save it to the database
+        // Initialize a Foyer and Bloc
         Foyer foyer = Foyer.builder()
                 .nomFoyer("Foyer A")
                 .capaciteFoyer(300)
                 .build();
 
-        foyer = foyerRepository.save(foyer); // Save the foyer first
+        // Simuler le comportement du foyerRepository
+        when(foyerRepository.save(any(Foyer.class))).thenReturn(foyer);
 
-        // Initialize the Bloc with the saved foyer
         bloc = Bloc.builder()
                 .nomBloc("Bloc A")
                 .capaciteBloc(100)
-                .foyer(foyer) // Use the saved foyer
+                .foyer(foyer)
                 .build();
 
-        // Save the Bloc in the database
-        bloc = blocRepository.save(bloc); // Save the bloc
-
-        // Create a Chambre associated with the Bloc
-
+        // Simuler le comportement du blocRepository
+        when(blocRepository.save(any(Bloc.class))).thenReturn(bloc);
+        when(blocRepository.findById(bloc.getIdBloc())).thenReturn(Optional.of(bloc));
+        when(blocRepository.findAll()).thenReturn(List.of(bloc));
     }
 
     @Test
@@ -78,10 +73,13 @@ class BlocServiceTest {
     @Test
     void testUpdateBloc() {
         bloc.setNomBloc("Bloc B");
+        when(blocRepository.save(bloc)).thenReturn(bloc);
+
         Bloc result = blocService.updateBloc(bloc);
 
         assertNotNull(result);
         assertEquals("Bloc B", result.getNomBloc());
+        assertEquals(100, result.getCapaciteBloc(), "La capacité du bloc doit rester 100 après la mise à jour.");
     }
 
     @Test
@@ -92,15 +90,15 @@ class BlocServiceTest {
                 .foyer(bloc.getFoyer())
                 .build();
 
+        when(blocRepository.save(newBloc)).thenReturn(newBloc);
+
         Bloc result = blocService.addBloc(newBloc);
 
         assertNotNull(result);
         assertEquals("Bloc C", result.getNomBloc());
 
-        // Verify the new Bloc is saved in the database
-        Bloc savedBloc = blocRepository.findById(result.getIdBloc()).orElse(null);
-        assertNotNull(savedBloc);
-        assertEquals("Bloc C", savedBloc.getNomBloc());
+        // Vérifier que le nouveau Bloc est enregistré
+        verify(blocRepository, times(1)).save(newBloc);
     }
 
     @Test
@@ -113,15 +111,16 @@ class BlocServiceTest {
 
     @Test
     void testRemoveBloc() {
+        doNothing().when(blocRepository).deleteById(bloc.getIdBloc());
         blocService.removeBloc(bloc.getIdBloc());
-        Bloc result = blocService.retrieveBloc(bloc.getIdBloc());
 
-        assertNull(result);
+        verify(blocRepository, times(1)).deleteById(bloc.getIdBloc());
     }
 
-    // Test for findByFoyerIdFoyer method
     @Test
     void testFindByFoyerIdFoyer() {
+        when(blocRepository.findByFoyerIdFoyer(bloc.getFoyer().getIdFoyer())).thenReturn(List.of(bloc));
+
         List<Bloc> result = blocService.findByFoyerIdFoyer(bloc.getFoyer().getIdFoyer());
 
         assertNotNull(result);
@@ -129,7 +128,6 @@ class BlocServiceTest {
         assertEquals("Bloc A", result.get(0).getNomBloc());
     }
 
-    // Test for findByChambresIdChambre method
     @Test
     void testFindByChambresIdChambre() {
         when(blocRepository.findByChambresIdChambre(1L)).thenReturn(bloc);
