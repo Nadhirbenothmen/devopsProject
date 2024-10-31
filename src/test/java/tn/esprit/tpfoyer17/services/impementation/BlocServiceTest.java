@@ -17,6 +17,7 @@ import tn.esprit.tpfoyer17.services.impementations.BlocService;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest // Launch a complete instance of the Spring context
@@ -129,5 +130,14 @@ class BlocServiceTest {
     }
 
     // Test for findByChambresIdChambre method
+    @Test
+    void testFindByChambresIdChambre() {
+        when(blocRepository.findByChambresIdChambre(1L)).thenReturn(bloc);
 
+        Bloc result = blocService.findByChambresIdChambre(1L);
+
+        assertNotNull(result);
+        assertEquals("Bloc A", result.getNomBloc());
+        verify(blocRepository, times(1)).findByChambresIdChambre(1L);
+    }
 }
