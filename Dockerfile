@@ -1,6 +1,6 @@
 FROM openjdk:17-slim
 
-EXPOSE 8287
+EXPOSE 8082
 
 # Installer curl
 RUN apt-get update && apt-get install -y curl
