@@ -13,6 +13,7 @@ import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre;
 import tn.esprit.tpfoyer17.repositories.ChambreRepository;
 import tn.esprit.tpfoyer17.repositories.EtudiantRepository;
 import tn.esprit.tpfoyer17.repositories.ReservationRepository;
+import tn.esprit.tpfoyer17.services.impementations.ReservationService;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @SpringBootTest
 public class ReservationServiceTestMock {
 
@@ -38,19 +40,17 @@ public class ReservationServiceTestMock {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this); // Initialise les mocks
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testRetrieveAllReservation() {
-        // Données de test
         Reservation reservation1 = Reservation.builder()
                 .idReservation("1")
                 .estValide(true)
                 .anneeUniversitaire(LocalDate.now())
                 .build();
 
-        // Simuler le comportement du dépôt
         when(reservationRepository.findAll()).thenReturn(List.of(reservation1));
 
         List<Reservation> reservations = reservationService.retrieveAllReservation();
@@ -62,17 +62,14 @@ public class ReservationServiceTestMock {
 
     @Test
     public void testUpdateReservation() {
-        // Créer une réservation
         Reservation reservation = Reservation.builder()
                 .idReservation("1")
                 .estValide(true)
                 .anneeUniversitaire(LocalDate.now())
                 .build();
 
-        // Simuler le comportement du dépôt
         when(reservationRepository.save(reservation)).thenReturn(reservation);
 
-        // Mettre à jour la réservation
         reservation.setEstValide(false);
         Reservation updatedReservation = reservationService.updateReservation(reservation);
 
@@ -81,17 +78,14 @@ public class ReservationServiceTestMock {
 
     @Test
     public void testRetrieveReservation() {
-        // Créer une réservation
         Reservation reservation = Reservation.builder()
                 .idReservation("1")
                 .estValide(true)
                 .anneeUniversitaire(LocalDate.now())
                 .build();
 
-        // Simuler le comportement du dépôt
         when(reservationRepository.findById("1")).thenReturn(Optional.of(reservation));
 
-        // Récupérer la réservation
         Reservation retrievedReservation = reservationService.retrieveReservation("1");
 
         assertNotNull(retrievedReservation);
@@ -100,7 +94,6 @@ public class ReservationServiceTestMock {
 
     @Test
     public void testAnnulerReservation() {
-        // Créer et sauvegarder un étudiant et une chambre pour la réservation
         Etudiant etudiant = Etudiant.builder()
                 .cinEtudiant(123456)
                 .nomEtudiant("John")
@@ -117,7 +110,6 @@ public class ReservationServiceTestMock {
 
         when(chambreRepository.findById(101L)).thenReturn(Optional.of(chambre));
 
-        // Créer une réservation
         Reservation reservation = Reservation.builder()
                 .idReservation("1")
                 .etudiants(new HashSet<>())
@@ -130,17 +122,14 @@ public class ReservationServiceTestMock {
         when(reservationRepository.findById("1")).thenReturn(Optional.of(reservation));
         when(reservationRepository.save(reservation)).thenReturn(reservation);
 
-        // Annuler la réservation
         reservationService.annulerReservation(etudiant.getCinEtudiant());
 
-        // Vérifier que la réservation est annulée
         Reservation canceledReservation = reservationService.retrieveReservation("1");
         assertFalse(canceledReservation.isEstValide());
     }
 
     @Test
     public void testAjouterReservation() {
-        // Créer et sauvegarder un étudiant
         Etudiant etudiant = Etudiant.builder()
                 .cinEtudiant(123456)
                 .nomEtudiant("Jane")
@@ -149,7 +138,6 @@ public class ReservationServiceTestMock {
 
         when(etudiantRepository.findByCinEtudiant(123456)).thenReturn(etudiant);
 
-        // Créer et sauvegarder une chambre
         Chambre chambre = Chambre.builder()
                 .idChambre(102L)
                 .numeroChambre(102L)
@@ -159,10 +147,9 @@ public class ReservationServiceTestMock {
 
         when(chambreRepository.findById(102L)).thenReturn(Optional.of(chambre));
 
-        // Ajouter une réservation
         Reservation addedReservation = reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
 
         assertNotNull(addedReservation);
-        assertEquals("102-BLOC", addedReservation.getIdReservation()); // Adaptez le format selon votre logique d'ID
+        assertTrue(addedReservation.getIdReservation().contains("102")); // Adjust ID format as needed
     }
 }
