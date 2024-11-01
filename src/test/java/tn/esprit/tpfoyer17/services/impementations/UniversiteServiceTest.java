@@ -27,6 +27,7 @@ class UniversiteServiceTest {
 
     @BeforeEach
     public void setup() {
+        reset(universiteRepository);
     }
 
     @Test
@@ -67,7 +68,7 @@ class UniversiteServiceTest {
         Universite universite = Universite.builder().nomUniversite("john").build();
         when(universiteRepository.save(any(Universite.class))).thenAnswer(invocation -> {
             Universite savedUniversite = invocation.getArgument(0);
-            return savedUniversite;  // On retourne directement l'université sans simuler l'ID
+            return savedUniversite;
         });
 
         Universite savedUniversite = universiteService.addUniversity(universite);
@@ -76,6 +77,42 @@ class UniversiteServiceTest {
         verify(universiteRepository, times(1)).save(universite);
     }
 
+    @Test
+    void testUpdateUniversity() {
+        Universite existingUniversite = Universite.builder().idUniversite(15).nomUniversite("oldName").build();
+        Universite updatedUniversite = Universite.builder().idUniversite(15).nomUniversite("newName").build();
 
+        when(universiteRepository.findById(15L)).thenReturn(Optional.of(existingUniversite));
+        when(universiteRepository.save(any(Universite.class))).thenReturn(updatedUniversite);
 
+        Universite result = universiteService.updateUniversity(15L, updatedUniversite);
+
+        assertNotNull(result);
+        assertEquals("newName", result.getNomUniversite());
+        verify(universiteRepository, times(1)).save(updatedUniversite);
+    }
+
+    @Test
+    void testDeleteUniversity() {
+        doNothing().when(universiteRepository).deleteById(10L);
+
+        universiteService.deleteUniversity(10L);
+
+        verify(universiteRepository, times(1)).deleteById(10L);
+    }
+
+    @Test
+    void testDeleteNonExistentUniversity() {
+        doThrow(new RuntimeException("University not found")).when(universiteRepository).deleteById(99L);
+
+        assertThrows(RuntimeException.class, () -> universiteService.deleteUniversity(99L));
+        verify(universiteRepository, times(1)).deleteById(99L);
+    }
+
+    @Test
+    void testCreateUniversityWithNullName() {
+        Universite universite = Universite.builder().nomUniversite(null).build();
+
+        assertThrows(IllegalArgumentException.class, () -> universiteService.addUniversity(universite));
+    }
 }

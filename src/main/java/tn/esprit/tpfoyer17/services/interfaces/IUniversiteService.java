@@ -1,21 +1,16 @@
 package tn.esprit.tpfoyer17.services.interfaces;
 
-import tn.esprit.tpfoyer17.entities.Reservation;
 import tn.esprit.tpfoyer17.entities.Universite;
-
-import java.time.LocalDate;
 import java.util.List;
 
 public interface IUniversiteService {
     List<Universite> retrieveAllUniversities();
-    Universite addUniversity (Universite u);
-    Universite updateUniversity (Universite u);
-    Universite retrieveUniversity (long idUniversity);
+    Universite addUniversity(Universite u);
+    Universite updateUniversity(long idUniversity, Universite u);
+    Universite retrieveUniversity(long idUniversity);
+    Universite desaffecterFoyerAUniversite(long idUniversite);
+    Universite affecterFoyerAUniversite(long idFoyer, String nomUniversite);
 
-
-
-    public Universite desaffecterFoyerAUniversite (  long idUniversite) ;
-
-    public Universite affecterFoyerAUniversite (long idFoyer, String nomUniversite) ;
-
+    // Ajout de la méthode deleteUniversity
+    void deleteUniversity(long idUniversity);
 }
