@@ -24,6 +24,7 @@
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
         <junit.platform.version>1.9.3</junit.platform.version>
     </properties>
+    <!-- Spring Boot Starter Data JPA -->
 
     <dependencies>
         <!-- Spring Boot Starter Data JPA -->
