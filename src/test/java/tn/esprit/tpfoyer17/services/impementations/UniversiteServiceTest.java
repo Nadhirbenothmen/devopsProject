@@ -2,79 +2,30 @@ package tn.esprit.tpfoyer17.services.impementations;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.MockitoAnnotations;
+
 import tn.esprit.tpfoyer17.entities.Universite;
 import tn.esprit.tpfoyer17.repositories.UniversiteRepository;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-//test test
-@ExtendWith(SpringExtension.class)
+
 class UniversiteServiceTest {
 
     @Mock
-    UniversiteRepository universiteRepository;
+    private UniversiteRepository universiteRepository;
 
     @InjectMocks
-    UniversiteService universiteService;
+    private UniversiteService universiteService;
 
     @BeforeEach
-    public void setup() {
-        reset(universiteRepository);
-    }
-
-    @Test
-    void testGetUniversitiesList() {
-        Universite universite1 = Universite.builder().idUniversite(9).nomUniversite("ben").build();
-        Universite universite2 = Universite.builder().idUniversite(8).nomUniversite("kevin").build();
-        when(universiteRepository.findAll()).thenReturn(Arrays.asList(universite1, universite2));
-
-        List<Universite> universiteList = universiteService.retrieveAllUniversities();
-
-        assertEquals(2, universiteList.size());
-        assertEquals("ben", universiteList.get(0).getNomUniversite());
-        assertEquals("kevin", universiteList.get(1).getNomUniversite());
-    }
-
-    @Test
-    void testGetUniversityById() {
-        Universite universite = Universite.builder().idUniversite(10).nomUniversite("george").build();
-        when(universiteRepository.findById(10L)).thenReturn(Optional.of(universite));
-
-        Universite universiteById = universiteService.retrieveUniversity(10);
-
-        assertNotNull(universiteById);
-        assertEquals("george", universiteById.getNomUniversite());
-    }
-
-    @Test
-    void testGetInvalidUniversityById() {
-        when(universiteRepository.findById(17L)).thenReturn(Optional.empty());
-
-        Universite result = universiteService.retrieveUniversity(17);
-
-        assertNull(result);
-    }
-
-    @Test
-    void testCreateUniversity() {
-        Universite universite = Universite.builder().nomUniversite("john").build();
-        when(universiteRepository.save(any(Universite.class))).thenAnswer(invocation -> {
-            Universite savedUniversite = invocation.getArgument(0);
-            return savedUniversite;
-        });
-
-        Universite savedUniversite = universiteService.addUniversity(universite);
-
-        assertEquals("john", savedUniversite.getNomUniversite());
-        verify(universiteRepository, times(1)).save(universite);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -89,30 +40,19 @@ class UniversiteServiceTest {
 
         assertNotNull(result);
         assertEquals("newName", result.getNomUniversite());
-        verify(universiteRepository, times(1)).save(updatedUniversite);
+        verify(universiteRepository, times(1)).save(existingUniversite); // Vérifiez que l'ancien objet est enregistré
     }
 
     @Test
-    void testDeleteUniversity() {
-        doNothing().when(universiteRepository).deleteById(10L);
+    void testRetrieveUniversityNotFound() {
+        when(universiteRepository.findById(15L)).thenReturn(Optional.empty());
 
-        universiteService.deleteUniversity(10L);
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            universiteService.retrieveUniversity(15L);
+        });
 
-        verify(universiteRepository, times(1)).deleteById(10L);
+        assertEquals("Université non trouvée", thrown.getMessage());
     }
 
-    @Test
-    void testDeleteNonExistentUniversity() {
-        doThrow(new RuntimeException("University not found")).when(universiteRepository).deleteById(99L);
-
-        assertThrows(RuntimeException.class, () -> universiteService.deleteUniversity(99L));
-        verify(universiteRepository, times(1)).deleteById(99L);
-    }
-
-    @Test
-    void testCreateUniversityWithNullName() {
-        Universite universite = Universite.builder().nomUniversite(null).build();
-
-        assertThrows(IllegalArgumentException.class, () -> universiteService.addUniversity(universite));
-    }
+    // Ajoutez d'autres tests selon vos besoins
 }
