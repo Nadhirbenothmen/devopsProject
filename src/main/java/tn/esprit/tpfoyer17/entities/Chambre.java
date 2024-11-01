@@ -39,4 +39,9 @@ public class Chambre implements Serializable {
     @OneToMany
     @JsonIgnore
     Set<Reservation> reservations ;
+
+    public void setId(long idChambre) {
+        this.idChambre = idChambre;
+    }
+
 }
