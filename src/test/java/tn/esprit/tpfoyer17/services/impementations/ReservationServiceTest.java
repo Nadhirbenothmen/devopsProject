@@ -115,7 +115,6 @@ class ReservationServiceTest {
         assertFalse(result.isEstValide());
         verify(reservationRepository, times(1)).save(reservation);
     }
-
     @Test
     void testAnnulerReservation_ReservationNotFound() {
         long cinEtudiant = 12345L;
