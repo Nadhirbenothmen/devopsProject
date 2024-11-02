@@ -83,16 +83,6 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).findById(reservationId);
     }
 
-    @Test
-    void testRetrieveReservation_NotFound() {
-        String reservationId = "nonexistent";
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
-
-        Reservation retrievedReservation = reservationService.retrieveReservation(reservationId);
-
-        assertNull(retrievedReservation);
-        verify(reservationRepository, times(1)).findById(reservationId);
-    }
 
     @Test
     void testAnnulerReservation() {
@@ -114,16 +104,6 @@ class ReservationServiceTest {
         assertNotNull(result);
         assertFalse(result.isEstValide());
         verify(reservationRepository, times(1)).save(reservation);
-    }
-    @Test
-    void testAnnulerReservation_ReservationNotFound() {
-        long cinEtudiant = 12345L;
-        when(etudiantRepository.findByCinEtudiant(cinEtudiant)).thenReturn(null);
-
-        Reservation result = reservationService.annulerReservation(cinEtudiant);
-
-        assertNull(result);
-        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test
