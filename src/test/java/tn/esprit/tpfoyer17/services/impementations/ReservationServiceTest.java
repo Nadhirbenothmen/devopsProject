@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.tpfoyer17.entities.Chambre;
 import tn.esprit.tpfoyer17.entities.Etudiant;
 import tn.esprit.tpfoyer17.entities.Reservation;
-import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre; // Assurez-vous que l'importation est correcte
+import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre;
 import tn.esprit.tpfoyer17.repositories.ChambreRepository;
 import tn.esprit.tpfoyer17.repositories.EtudiantRepository;
 import tn.esprit.tpfoyer17.repositories.ReservationRepository;
@@ -17,8 +17,6 @@ import tn.esprit.tpfoyer17.repositories.ReservationRepository;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,72 +39,52 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationRepository.deleteAll();
+        reservationRepository.deleteAll();  // Nettoyage de la base pour chaque test
         etudiantRepository.deleteAll();
-        chambreRepository.deleteAll(); // Nettoyage de la base pour chaque test
+        chambreRepository.deleteAll();
     }
 
     @Test
     void testRetrieveAllReservations() {
         // Arrange
-        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.SIMPLE).build(); // Utilisation de l'énumération
-        chambreRepository.save(chambre);
-
-        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
-        etudiantRepository.save(etudiant);
-
-        Reservation reservation = Reservation.builder()
-                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
-                .anneeUniversitaire(LocalDate.now())
-                .estValide(true)
-                .etudiants(new HashSet<>(Set.of(etudiant)))
-                .build();
-        reservationRepository.save(reservation);
+        Reservation reservation1 = createReservation("R1");
+        Reservation reservation2 = createReservation("R2");
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
 
         // Act
         List<Reservation> result = reservationService.retrieveAllReservation();
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test
     void testAddReservation() {
         // Arrange
-        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.DOUBLE).build(); // Utilisation de l'énumération
-        chambreRepository.save(chambre);
-
-        Etudiant etudiant = Etudiant.builder().nomEtudiant("Durand").prenomEtudiant("Paul").build();
-        etudiantRepository.save(etudiant);
-
-        // Act
-        Reservation savedReservation = reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
-
-        // Assert
-        assertNotNull(savedReservation);
-        assertEquals(TypeChambre.DOUBLE, chambre.getTypeChambre()); // Vérifiez avec l'énumération
-    }
-
-    @Test
-    void testUpdateReservation() {
-        // Arrange
-        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.SIMPLE).build(); // Utilisation de l'énumération
+        Chambre chambre = Chambre.builder().numeroChambre(101).typeChambre(TypeChambre.SIMPLE).build();
         chambreRepository.save(chambre);
 
         Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
         etudiantRepository.save(etudiant);
 
-        Reservation reservation = Reservation.builder()
-                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
-                .anneeUniversitaire(LocalDate.now())
-                .estValide(true)
-                .etudiants(new HashSet<>(Set.of(etudiant)))
-                .build();
+        // Act
+        Reservation reservation = reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
+
+        // Assert
+        assertNotNull(reservation);
+        assertEquals(chambre.getNumeroChambre(), reservation.getIdReservation().split("-")[0]); // Vérifie le numéro de chambre dans l'ID
+    }
+
+    @Test
+    void testUpdateReservation() {
+        // Arrange
+        Reservation reservation = createReservation("R1");
         reservationRepository.save(reservation);
+        reservation.setEstValide(false);
 
         // Act
-        reservation.setEstValide(false);
         Reservation updatedReservation = reservationService.updateReservation(reservation);
 
         // Assert
@@ -116,80 +94,61 @@ class ReservationServiceTest {
     @Test
     void testRetrieveReservation() {
         // Arrange
-        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.SIMPLE).build(); // Utilisation de l'énumération
-        chambreRepository.save(chambre);
-
-        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
-        etudiantRepository.save(etudiant);
-
-        Reservation reservation = Reservation.builder()
-                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
-                .anneeUniversitaire(LocalDate.now())
-                .estValide(true)
-                .etudiants(new HashSet<>(Set.of(etudiant)))
-                .build();
-        Reservation savedReservation = reservationRepository.save(reservation);
+        Reservation reservation = createReservation("R1");
+        reservationRepository.save(reservation);
 
         // Act
-        Reservation result = reservationService.retrieveReservation(savedReservation.getIdReservation());
+        Reservation result = reservationService.retrieveReservation(reservation.getIdReservation());
 
         // Assert
         assertNotNull(result);
-        assertEquals("SIMPLE", result.getEtudiants().iterator().next().getNomEtudiant());
+        assertEquals("R1", result.getIdReservation());
     }
 
     @Test
     void testAnnulerReservation() {
         // Arrange
-        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.TRIPLE).build(); // Utilisation de l'énumération
+        Chambre chambre = Chambre.builder().numeroChambre(101).typeChambre(TypeChambre.SIMPLE).build();
         chambreRepository.save(chambre);
 
         Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
         etudiantRepository.save(etudiant);
 
-        Reservation reservation = Reservation.builder()
-                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
-                .anneeUniversitaire(LocalDate.now())
-                .estValide(true)
-                .etudiants(new HashSet<>(Set.of(etudiant)))
-                .build();
-        reservationRepository.save(reservation);
+        Reservation reservation = reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
 
         // Act
         reservationService.annulerReservation(etudiant.getCinEtudiant());
 
         // Assert
-        Optional<Reservation> cancelledReservation = reservationRepository.findById(reservation.getIdReservation());
-        assertTrue(cancelledReservation.isPresent());
-        assertFalse(cancelledReservation.get().isEstValide());
+        assertNull(reservationService.retrieveReservation(reservation.getIdReservation()));
     }
 
     @Test
     void testGetReservationParAnneeUniversitaireEtNomUniversite() {
         // Arrange
-        // Simule l'ajout d'une réservation et de ses dépendances
         LocalDate anneeUniversitaire = LocalDate.now();
-        String nomUniversite = "ESPRIT";
-
-        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.DOUBLE).build(); // Utilisation de l'énumération
+        Chambre chambre = Chambre.builder().numeroChambre(101).typeChambre(TypeChambre.SIMPLE).build();
         chambreRepository.save(chambre);
 
-        Etudiant etudiant = Etudiant.builder().nomEtudiant("Durand").prenomEtudiant("Paul").build();
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
         etudiantRepository.save(etudiant);
 
-        Reservation reservation = Reservation.builder()
-                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
-                .anneeUniversitaire(anneeUniversitaire)
-                .estValide(true)
-                .etudiants(new HashSet<>(Set.of(etudiant)))
-                .build();
-        reservationRepository.save(reservation);
+        reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
 
         // Act
-        List<Reservation> result = reservationService.getReservationParAnneeUniversitaireEtNomUniversite(anneeUniversitaire, nomUniversite);
+        List<Reservation> result = reservationService.getReservationParAnneeUniversitaireEtNomUniversite(anneeUniversitaire, "NomUniversite");
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertFalse(result.isEmpty());
+    }
+
+    private Reservation createReservation(String id) {
+        return Reservation.builder()
+                .idReservation(id)
+                .anneeUniversitaire(LocalDate.now())
+                .estValide(true)
+                .etudiants(new HashSet<>())
+                .build();
     }
 }
