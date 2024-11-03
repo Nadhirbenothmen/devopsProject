@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback
 class ReservationServiceTest {
 
     @Autowired
     private EntityManager entityManager;
+
     @Autowired
     private ReservationService reservationService;
 
@@ -48,6 +48,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     public void setUp() {
+        // Configuration de la base de données de test
         bloc = new Bloc();
         bloc.setNomBloc("Bloc A");
         bloc.setCapaciteBloc(50L);
@@ -56,7 +57,7 @@ class ReservationServiceTest {
         chambre = new Chambre();
         chambre.setNumeroChambre(101L);
         chambre.setTypeChambre(TypeChambre.SIMPLE);
-        chambre.setBloc(bloc); // Établir la relation
+        chambre.setBloc(bloc);
         entityManager.persist(chambre);
 
         etudiant = new Etudiant();
@@ -67,8 +68,9 @@ class ReservationServiceTest {
 
         reservation = new Reservation();
         reservation.setIdReservation("R001");
-        reservation.setAnneeUniversitaire(LocalDate.of(2024, 9, 1)); // Exemple d'année universitaire
+        reservation.setAnneeUniversitaire(LocalDate.of(2024, 9, 1));
         reservation.setEstValide(true);
+        reservation.setEtudiants(new HashSet<>()); // Assurez-vous d'initialiser la collection
         entityManager.persist(reservation);
     }
 
@@ -91,10 +93,15 @@ class ReservationServiceTest {
     @Test
     void testAddReservation() {
         // Arrange
-        Chambre chambre = Chambre.builder().numeroChambre(101).typeChambre(TypeChambre.SIMPLE).build();
+        Chambre chambre = new Chambre();
+        chambre.setNumeroChambre(102L);
+        chambre.setTypeChambre(TypeChambre.SIMPLE);
         chambreRepository.save(chambre);
 
-        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
+        Etudiant etudiant = new Etudiant();
+        etudiant.setCinEtudiant(987654321L);
+        etudiant.setNomEtudiant("Dupont");
+        etudiant.setPrenomEtudiant("Jean");
         etudiantRepository.save(etudiant);
 
         // Act
@@ -133,16 +140,19 @@ class ReservationServiceTest {
         assertEquals("R1", result.getIdReservation());
     }
 
-
-
     @Test
     void testGetReservationParAnneeUniversitaireEtNomUniversite() {
         // Arrange
-        LocalDate anneeUniversitaire = LocalDate.now();
-        Chambre chambre = Chambre.builder().numeroChambre(101).typeChambre(TypeChambre.SIMPLE).build();
+        LocalDate anneeUniversitaire = LocalDate.of(2024, 9, 1); // Exemple d'année universitaire
+        Chambre chambre = new Chambre();
+        chambre.setNumeroChambre(101L);
+        chambre.setTypeChambre(TypeChambre.SIMPLE);
         chambreRepository.save(chambre);
 
-        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
+        Etudiant etudiant = new Etudiant();
+        etudiant.setCinEtudiant(987654321L);
+        etudiant.setNomEtudiant("Dupont");
+        etudiant.setPrenomEtudiant("Jean");
         etudiantRepository.save(etudiant);
 
         reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
@@ -156,11 +166,6 @@ class ReservationServiceTest {
     }
 
     private Reservation createReservation(String id) {
-        return Reservation.builder()
-                .idReservation(id)
-                .anneeUniversitaire(LocalDate.now())
-                .estValide(true)
-                .etudiants(new HashSet<>())
-                .build();
+        return new Reservation(id, LocalDate.now(), true, new HashSet<>());
     }
 }
