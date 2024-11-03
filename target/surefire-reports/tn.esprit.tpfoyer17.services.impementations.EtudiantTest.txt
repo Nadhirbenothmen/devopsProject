@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: tn.esprit.tpfoyer17.services.impementations.EtudiantTest
--------------------------------------------------------------------------------
-Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.028 s - in tn.esprit.tpfoyer17.services.impementations.EtudiantTest
