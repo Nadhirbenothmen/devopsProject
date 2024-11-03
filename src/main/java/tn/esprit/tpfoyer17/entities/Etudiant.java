@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -25,16 +26,16 @@ public class Etudiant implements Serializable {
     long idEtudiant;
 
     String nomEtudiant;
-
     String prenomEtudiant;
-
     long cinEtudiant;
-
     Date dateNaissance;
 
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "etudiants")
+    @ManyToMany
+    @JoinTable(
+            name = "reservation_etudiants",
+            joinColumns = @JoinColumn(name = "etudiant_id"),
+            inverseJoinColumns = @JoinColumn(name = "reservation_id")
+    )
     @JsonIgnore
-    Set<Reservation> reservations;
-
+    Set<Reservation> reservations = new HashSet<>();
 }

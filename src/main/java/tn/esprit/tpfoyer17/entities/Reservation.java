@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -21,15 +22,18 @@ import java.util.Set;
 public class Reservation implements Serializable {
 
     @Id
-   // @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(length = 255)  // Assurez-vous que la colonne peut contenir un ID unique
     String idReservation;
 
     LocalDate anneeUniversitaire;
-
     boolean estValide;
 
-    @ToString.Exclude
-    @ManyToMany
+    @ManyToMany(mappedBy = "reservations")
     @JsonIgnore
-    Set<Etudiant> etudiants;
+    Set<Etudiant> etudiants = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "chambre_id")  // Relie la réservation à une chambre spécifique
+    @JsonIgnore
+    Chambre chambre;
 }
