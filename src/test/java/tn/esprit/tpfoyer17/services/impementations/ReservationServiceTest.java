@@ -1,11 +1,13 @@
 package tn.esprit.tpfoyer17.services.impementations;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import tn.esprit.tpfoyer17.entities.Bloc;
 import tn.esprit.tpfoyer17.entities.Chambre;
 import tn.esprit.tpfoyer17.entities.Etudiant;
 import tn.esprit.tpfoyer17.entities.Reservation;
@@ -26,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReservationServiceTest {
 
     @Autowired
+    private EntityManager entityManager;
+    @Autowired
     private ReservationService reservationService;
 
     @Autowired
@@ -37,11 +41,35 @@ class ReservationServiceTest {
     @Autowired
     private ChambreRepository chambreRepository;
 
+    private Bloc bloc;
+    private Chambre chambre;
+    private Etudiant etudiant;
+    private Reservation reservation;
+
     @BeforeEach
-    void setUp() {
-        reservationRepository.deleteAll();  // Nettoyage de la base pour chaque test
-        etudiantRepository.deleteAll();
-        chambreRepository.deleteAll();
+    public void setUp() {
+        bloc = new Bloc();
+        bloc.setNomBloc("Bloc A");
+        bloc.setCapaciteBloc(50L);
+        entityManager.persist(bloc);
+
+        chambre = new Chambre();
+        chambre.setNumeroChambre(101L);
+        chambre.setTypeChambre(TypeChambre.SIMPLE);
+        chambre.setBloc(bloc); // Établir la relation
+        entityManager.persist(chambre);
+
+        etudiant = new Etudiant();
+        etudiant.setCinEtudiant(123456789L);
+        etudiant.setNomEtudiant("John");
+        etudiant.setPrenomEtudiant("Doe");
+        entityManager.persist(etudiant);
+
+        reservation = new Reservation();
+        reservation.setIdReservation("R001");
+        reservation.setAnneeUniversitaire(LocalDate.of(2024, 9, 1)); // Exemple d'année universitaire
+        reservation.setEstValide(true);
+        entityManager.persist(reservation);
     }
 
     @Test
