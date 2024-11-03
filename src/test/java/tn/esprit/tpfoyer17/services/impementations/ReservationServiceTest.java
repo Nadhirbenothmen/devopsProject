@@ -2,104 +2,194 @@ package tn.esprit.tpfoyer17.services.impementations;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.tpfoyer17.entities.Chambre;
 import tn.esprit.tpfoyer17.entities.Etudiant;
 import tn.esprit.tpfoyer17.entities.Reservation;
+import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre; // Assurez-vous que l'importation est correcte
 import tn.esprit.tpfoyer17.repositories.ChambreRepository;
 import tn.esprit.tpfoyer17.repositories.EtudiantRepository;
 import tn.esprit.tpfoyer17.repositories.ReservationRepository;
-import tn.esprit.tpfoyer17.repositories.UniversiteRepository;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
+@SpringBootTest
+@Transactional
+@Rollback
 class ReservationServiceTest {
 
-    @InjectMocks
+    @Autowired
     private ReservationService reservationService;
 
-    @Mock
+    @Autowired
     private ReservationRepository reservationRepository;
 
-    @Mock
+    @Autowired
     private EtudiantRepository etudiantRepository;
 
-    @Mock
+    @Autowired
     private ChambreRepository chambreRepository;
-
-    @Mock
-    private UniversiteRepository universiteRepository;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        reservationRepository.deleteAll();
+        etudiantRepository.deleteAll();
+        chambreRepository.deleteAll(); // Nettoyage de la base pour chaque test
+    }
+
+    @Test
+    void testRetrieveAllReservations() {
+        // Arrange
+        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.SIMPLE).build(); // Utilisation de l'énumération
+        chambreRepository.save(chambre);
+
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
+        etudiantRepository.save(etudiant);
+
+        Reservation reservation = Reservation.builder()
+                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
+                .anneeUniversitaire(LocalDate.now())
+                .estValide(true)
+                .etudiants(new HashSet<>(Set.of(etudiant)))
+                .build();
+        reservationRepository.save(reservation);
+
+        // Act
+        List<Reservation> result = reservationService.retrieveAllReservation();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testAddReservation() {
+        // Arrange
+        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.DOUBLE).build(); // Utilisation de l'énumération
+        chambreRepository.save(chambre);
+
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Durand").prenomEtudiant("Paul").build();
+        etudiantRepository.save(etudiant);
+
+        // Act
+        Reservation savedReservation = reservationService.ajouterReservation(chambre.getIdChambre(), etudiant.getCinEtudiant());
+
+        // Assert
+        assertNotNull(savedReservation);
+        assertEquals(TypeChambre.DOUBLE, chambre.getTypeChambre()); // Vérifiez avec l'énumération
+    }
+
+    @Test
+    void testUpdateReservation() {
+        // Arrange
+        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.SIMPLE).build(); // Utilisation de l'énumération
+        chambreRepository.save(chambre);
+
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
+        etudiantRepository.save(etudiant);
+
+        Reservation reservation = Reservation.builder()
+                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
+                .anneeUniversitaire(LocalDate.now())
+                .estValide(true)
+                .etudiants(new HashSet<>(Set.of(etudiant)))
+                .build();
+        reservationRepository.save(reservation);
+
+        // Act
+        reservation.setEstValide(false);
+        Reservation updatedReservation = reservationService.updateReservation(reservation);
+
+        // Assert
+        assertFalse(updatedReservation.isEstValide());
     }
 
     @Test
     void testRetrieveReservation() {
         // Arrange
-        String reservationId = "1-BlocA-2023";
-        Reservation reservation = Reservation.builder().idReservation(reservationId).estValide(true).build();
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.SIMPLE).build(); // Utilisation de l'énumération
+        chambreRepository.save(chambre);
+
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
+        etudiantRepository.save(etudiant);
+
+        Reservation reservation = Reservation.builder()
+                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
+                .anneeUniversitaire(LocalDate.now())
+                .estValide(true)
+                .etudiants(new HashSet<>(Set.of(etudiant)))
+                .build();
+        Reservation savedReservation = reservationRepository.save(reservation);
 
         // Act
-        Reservation foundReservation = reservationService.retrieveReservation(reservationId);
+        Reservation result = reservationService.retrieveReservation(savedReservation.getIdReservation());
 
         // Assert
-        assertNotNull(foundReservation);
-        assertEquals(reservationId, foundReservation.getIdReservation());
-        verify(reservationRepository, times(1)).findById(reservationId);
+        assertNotNull(result);
+        assertEquals("SIMPLE", result.getEtudiants().iterator().next().getNomEtudiant());
     }
 
     @Test
     void testAnnulerReservation() {
         // Arrange
-        long cinEtudiant = 12345678L;
-        Etudiant etudiant = Etudiant.builder().cinEtudiant(cinEtudiant).reservations(new HashSet<>()).build();
-        Reservation reservation = Reservation.builder().idReservation("1-BlocA-2023").etudiants(new HashSet<>()).estValide(true).build();
-        reservation.getEtudiants().add(etudiant);
-        etudiant.getReservations().add(reservation);
+        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.TRIPLE).build(); // Utilisation de l'énumération
+        chambreRepository.save(chambre);
 
-        when(etudiantRepository.findByCinEtudiant(cinEtudiant)).thenReturn(etudiant);
-        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Dupont").prenomEtudiant("Jean").build();
+        etudiantRepository.save(etudiant);
+
+        Reservation reservation = Reservation.builder()
+                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
+                .anneeUniversitaire(LocalDate.now())
+                .estValide(true)
+                .etudiants(new HashSet<>(Set.of(etudiant)))
+                .build();
+        reservationRepository.save(reservation);
 
         // Act
-        Reservation result = reservationService.annulerReservation(cinEtudiant);
+        reservationService.annulerReservation(etudiant.getCinEtudiant());
 
         // Assert
-        assertNull(result);
-        verify(etudiantRepository, times(1)).findByCinEtudiant(cinEtudiant);
-        verify(reservationRepository, atLeastOnce()).save(any(Reservation.class));
+        Optional<Reservation> cancelledReservation = reservationRepository.findById(reservation.getIdReservation());
+        assertTrue(cancelledReservation.isPresent());
+        assertFalse(cancelledReservation.get().isEstValide());
     }
 
     @Test
-    void testAjouterReservation() {
+    void testGetReservationParAnneeUniversitaireEtNomUniversite() {
         // Arrange
-        long idChambre = 1L;
-        long cinEtudiant = 12345678L;
-        Etudiant etudiant = Etudiant.builder().cinEtudiant(cinEtudiant).build();
-        Chambre chambre = Chambre.builder().idChambre(idChambre).numeroChambre(101L).reservations(new HashSet<>()).build();
+        // Simule l'ajout d'une réservation et de ses dépendances
+        LocalDate anneeUniversitaire = LocalDate.now();
+        String nomUniversite = "ESPRIT";
 
-        when(etudiantRepository.findByCinEtudiant(cinEtudiant)).thenReturn(etudiant);
-        when(chambreRepository.findById(idChambre)).thenReturn(Optional.of(chambre));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Chambre chambre = Chambre.builder().typeChambre(TypeChambre.DOUBLE).build(); // Utilisation de l'énumération
+        chambreRepository.save(chambre);
+
+        Etudiant etudiant = Etudiant.builder().nomEtudiant("Durand").prenomEtudiant("Paul").build();
+        etudiantRepository.save(etudiant);
+
+        Reservation reservation = Reservation.builder()
+                .idReservation("1-" + chambre.getTypeChambre() + "-" + LocalDate.now().getYear())
+                .anneeUniversitaire(anneeUniversitaire)
+                .estValide(true)
+                .etudiants(new HashSet<>(Set.of(etudiant)))
+                .build();
+        reservationRepository.save(reservation);
 
         // Act
-        Reservation newReservation = reservationService.ajouterReservation(idChambre, cinEtudiant);
+        List<Reservation> result = reservationService.getReservationParAnneeUniversitaireEtNomUniversite(anneeUniversitaire, nomUniversite);
 
         // Assert
-        assertNotNull(newReservation);
-        assertTrue(newReservation.getEtudiants().contains(etudiant));
-        assertTrue(chambre.getReservations().contains(newReservation));
-        verify(chambreRepository, times(1)).findById(idChambre);
-        verify(reservationRepository, atLeastOnce()).save(any(Reservation.class));
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 }

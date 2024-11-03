@@ -30,12 +30,13 @@ public class Chambre implements Serializable {
     @Enumerated(EnumType.STRING)
     TypeChambre typeChambre;
 
+    @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "bloc_id")  // Définir une colonne explicite pour la relation avec Bloc
     @JsonIgnore
     Bloc bloc;
 
-    @OneToMany(mappedBy = "chambre", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @OneToMany
     @JsonIgnore
-    Set<Reservation> reservations = new HashSet<>();
+    Set<Reservation> reservations ;
 }
