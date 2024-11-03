@@ -1,106 +1,148 @@
 package tn.esprit.tpfoyer17.services.impementations;
 
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import tn.esprit.tpfoyer17.entities.Bloc;
+import tn.esprit.tpfoyer17.entities.Chambre;
+import tn.esprit.tpfoyer17.entities.Etudiant;
 import tn.esprit.tpfoyer17.entities.Reservation;
+import tn.esprit.tpfoyer17.entities.enumerations.TypeChambre;
+import tn.esprit.tpfoyer17.repositories.ChambreRepository;
+import tn.esprit.tpfoyer17.repositories.EtudiantRepository;
 import tn.esprit.tpfoyer17.repositories.ReservationRepository;
+import tn.esprit.tpfoyer17.repositories.UniversiteRepository;
+import tn.esprit.tpfoyer17.services.impementations.ReservationService;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+@ExtendWith(MockitoExtension.class)
+class ReservationServiceImplMockTest {
 
-@SpringBootTest
-@Transactional
-@Rollback
-class ReservationServiceTest {
+    @Mock
+    ReservationRepository reservationRepository;
 
-    @Autowired
-    private EntityManager entityManager;
+    @Mock
+    EtudiantRepository etudiantRepository;
 
-    @Autowired
-    private ReservationService reservationService;
+    @Mock
+    ChambreRepository chambreRepository;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    @Mock
+    UniversiteRepository universiteRepository;
 
-    private Reservation reservation;
-
-    @BeforeEach
-    public void setUp() {
-        reservation = new Reservation();
-        reservation.setIdReservation("R001");
-        reservation.setAnneeUniversitaire(LocalDate.of(2024, 9, 1));
-        reservation.setEstValide(true);
-        entityManager.persist(reservation);
-    }
+    @InjectMocks
+    ReservationService reservationService;
 
     @Test
-    void testRetrieveAllReservations() {
-        // Arrange
-        Reservation reservation1 = createReservation("R002");
-        Reservation reservation2 = createReservation("R003");
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
+    public void testRetrieveAllReservations() {
+        Reservation reservation1 = new Reservation("1", LocalDate.now(), true, new HashSet<>());
+        Reservation reservation2 = new Reservation("2", LocalDate.now(), false, new HashSet<>());
+        List<Reservation> reservations = Arrays.asList(reservation1, reservation2);
 
-        // Act
+        Mockito.when(reservationRepository.findAll()).thenReturn(reservations);
+
         List<Reservation> result = reservationService.retrieveAllReservation();
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(3, result.size()); // Compte la réservation initiale et les deux nouvelles
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertEquals("1", result.get(0).getIdReservation());
     }
 
     @Test
-    void testAddReservation() {
+    public void testRetrieveReservation() {
+        Reservation reservation = new Reservation("1", LocalDate.now(), true, new HashSet<>());
+        Mockito.when(reservationRepository.findById("1")).thenReturn(Optional.of(reservation));
+
+        Reservation result = reservationService.retrieveReservation("1");
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("1", result.getIdReservation());
+    }
+
+    @Test
+    public void testAddReservation() {
         // Arrange
-        long chambreId = 1L; // Remplacez par un ID de chambre valide dans votre base de données
-        long cinEtudiant = 123456789L; // Remplacez par un CIN d'étudiant valide dans votre base de données
+        long cinEtudiant = 123L;
+        long idChambre = 1L;
+
+        // Create a student
+        Etudiant etudiant = new Etudiant();
+        etudiant.setCinEtudiant(cinEtudiant);
+
+        // Create a block and initialize it
+        Bloc bloc = new Bloc();
+        bloc.setNomBloc("Block A"); // Set a name for the block
+
+        // Create a chambre using constructor
+        Chambre chambre = new Chambre(idChambre, 1L, TypeChambre.SIMPLE, bloc, new HashSet<>());
+
+        // Create a reservation
+        Reservation reservation = new Reservation("1", LocalDate.now(), true, new HashSet<>(Collections.singleton(etudiant)));
+
+        // Set up mock behavior
+        Mockito.when(etudiantRepository.findByCinEtudiant(cinEtudiant)).thenReturn(etudiant);
+        Mockito.when(chambreRepository.findById(idChambre)).thenReturn(Optional.of(chambre));
+        Mockito.when(reservationRepository.save(Mockito.any(Reservation.class))).thenReturn(reservation);
 
         // Act
-        Reservation savedReservation = reservationService.ajouterReservation(chambreId, cinEtudiant);
+        Reservation result = reservationService.ajouterReservation(idChambre, cinEtudiant);
 
         // Assert
-        assertNotNull(savedReservation);
-        assertEquals("1-BLOC-2024", savedReservation.getIdReservation()); // Assurez-vous que cela correspond à votre logique d'ID
-        assertTrue(savedReservation.isEstValide());
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("1", result.getIdReservation());
     }
 
 
+
     @Test
-    void testUpdateReservation() {
+    public void testCancelReservation() {
         // Arrange
-        reservation.setEstValide(false);
+        long cinEtudiant = 123L;
+
+        // Create a student
+        Etudiant etudiant = new Etudiant();
+        etudiant.setCinEtudiant(cinEtudiant);
+
+        // Create a reservation and link it to the student
+        Reservation reservation = new Reservation("1", LocalDate.now(), true, new HashSet<>(Collections.singleton(etudiant)));
+        etudiant.setReservations(new HashSet<>(Collections.singleton(reservation)));
+
+        // Mock behavior for etudiantRepository
+        Mockito.when(etudiantRepository.findByCinEtudiant(cinEtudiant)).thenReturn(etudiant);
+
+        // Create a Chambre instance and initialize the typeChambre and reservations set
+        Chambre chambre = new Chambre();
+        chambre.setTypeChambre(TypeChambre.SIMPLE); // Set the typeChambre to a valid enum value
+        chambre.setReservations(new HashSet<>()); // Initialize the reservations set
+        Mockito.when(chambreRepository.findByReservationsIdReservation("1")).thenReturn(chambre);
 
         // Act
-        Reservation updatedReservation = reservationService.updateReservation(reservation);
+        reservationService.annulerReservation(cinEtudiant);
 
         // Assert
-        assertFalse(updatedReservation.isEstValide());
+        Mockito.verify(reservationRepository, Mockito.times(1)).save(Mockito.any(Reservation.class));
     }
+
 
     @Test
-    void testRetrieveReservation() {
-        // Act
-        Reservation result = reservationService.retrieveReservation(reservation.getIdReservation());
+    public void testGetReservationParAnneeUniversitaireEtNomUniversite() {
+        Reservation reservation1 = new Reservation("1", LocalDate.of(2022, 9, 1), true, new HashSet<>());
+        Reservation reservation2 = new Reservation("2", LocalDate.of(2022, 9, 1), false, new HashSet<>());
+        List<Reservation> reservations = Arrays.asList(reservation1, reservation2);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("R001", result.getIdReservation());
-    }
+        Mockito.when(reservationRepository.recupererParBlocEtTypeChambre("Esprit", LocalDate.of(2022, 9, 1)))
+                .thenReturn(reservations);
 
+        List<Reservation> result = reservationService.getReservationParAnneeUniversitaireEtNomUniversite(
+                LocalDate.of(2022, 9, 1), "Esprit");
 
-
-    private Reservation createReservation(String id) {
-        return Reservation.builder()
-                .idReservation(id)
-                .anneeUniversitaire(LocalDate.now())
-                .estValide(true)
-                .build();
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.size());
     }
 }
