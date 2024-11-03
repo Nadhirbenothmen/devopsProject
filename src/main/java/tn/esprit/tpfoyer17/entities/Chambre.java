@@ -38,5 +38,5 @@ public class Chambre implements Serializable {
     @ToString.Exclude
     @OneToMany
     @JsonIgnore
-    Set<Reservation> reservations = new HashSet<>();
+    Set<Reservation> reservations ;
 }
