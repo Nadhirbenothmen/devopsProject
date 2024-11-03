@@ -99,6 +99,13 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.2.7.Final</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -173,7 +180,7 @@
         <repository>
             <id>deploymentRepo</id>
             <name>Nexus Repository</name>
-            <url>http://192.168.116.125:8081/repository/maven-releases/</url>
+            <url>http://192.168.1.23:8081/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
