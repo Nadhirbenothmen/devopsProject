@@ -16,6 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
+
+@CrossOrigin(origins = "http://localhost:4200")
+
 @RequestMapping("api/chambres")
 public class ChambreController {
     @GetMapping("/retrieveAllChambres")
@@ -33,7 +36,7 @@ public class ChambreController {
         return chambreService.updateChambre(c);
     }
 
-    @GetMapping("/retrieveChambre/{idChambre}")
+    @DeleteMapping("/retrieveChambre/{idChambre}")
     public Chambre retrieveChambre(@PathVariable("idChambre") long idChambre) {
         return chambreService.retrieveChambre(idChambre);
     }
