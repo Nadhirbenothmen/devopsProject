@@ -12,6 +12,7 @@ public interface IBlocService {
     Bloc retrieveBloc (long idBloc);
     void removeBloc (long idBloc);
 
+
     List<Bloc> findByFoyerIdFoyer(long idFoyer);
     Bloc findByChambresIdChambre(Long idChambre);
 

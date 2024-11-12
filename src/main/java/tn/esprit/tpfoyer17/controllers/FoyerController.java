@@ -14,6 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
+
+@CrossOrigin(origins = "http://localhost:4200")
+
 @RequestMapping("api/foyers")
 public class FoyerController {
     @GetMapping("/retrieveAllFoyers")
@@ -32,7 +35,7 @@ public class FoyerController {
     public Foyer retrieveFoyer(@PathVariable("idFoyer") long idFoyer) {
         return foyerService.retrieveFoyer(idFoyer);
     }
-@DeleteMapping("/removeFoyer")
+@DeleteMapping("/removeFoyer/{idFoyer}")
     public void removeFoyer(@PathVariable("idFoyer") long idFoyer) {
         foyerService.removeFoyer(idFoyer);
     }

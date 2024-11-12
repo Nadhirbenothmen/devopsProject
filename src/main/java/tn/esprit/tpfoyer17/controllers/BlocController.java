@@ -14,6 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
+
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("api/blocs")
 
 
@@ -36,7 +38,7 @@ public class BlocController {
     }
 
 
-    @G<etMapping("/retrieveBloc/{idBloc}")
+    @GetMapping("/retrieveBloc/{idBloc}")
     public Bloc retrieveBloc(@PathVariable("idBloc") long idBloc) {
         return blocService.retrieveBloc(idBloc);
     }
