@@ -1,26 +1,28 @@
 package tn.esprit.tpfoyer17.services.impementations;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tn.esprit.tpfoyer17.entities.Foyer;
 import tn.esprit.tpfoyer17.entities.Universite;
+import tn.esprit.tpfoyer17.repositories.FoyerRepository;
 import tn.esprit.tpfoyer17.repositories.UniversiteRepository;
 import tn.esprit.tpfoyer17.services.interfaces.IUniversiteService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UniversiteService implements IUniversiteService {
-
-    private final UniversiteRepository universiteRepository;
-
+    UniversiteRepository universiteRepository;
+    FoyerRepository foyerRepository;
     @Override
     public List<Universite> retrieveAllUniversities() {
-        // Convertir l'Iterable en List
-        List<Universite> universities = new ArrayList<>();
-        universiteRepository.findAll().forEach(universities::add);
-        return universities;
+        return (List<Universite>) universiteRepository.findAll();
     }
 
     @Override
@@ -29,30 +31,30 @@ public class UniversiteService implements IUniversiteService {
     }
 
     @Override
-    public Universite updateUniversity(long idUniversite, Universite u) {
-        Universite existingUniversite = universiteRepository.findById(idUniversite)
-                .orElseThrow(() -> new RuntimeException("Université non trouvée"));
-
-        existingUniversite.setNomUniversite(u.getNomUniversite());
-        // mettez à jour d'autres champs si nécessaire
-        return universiteRepository.save(existingUniversite);
+    public Universite updateUniversity(Universite u) {
+        return universiteRepository.save(u);
     }
 
     @Override
     public Universite retrieveUniversity(long idUniversity) {
-        return universiteRepository.findById(idUniversity)
-                .orElseThrow(() -> new RuntimeException("Université non trouvée"));
+        return universiteRepository.findById(idUniversity).orElse(null);
     }
 
+
     @Override
-    public Universite desaffecterFoyerAUniversite(long idUniversite) {
-        // logique pour désaffecter un foyer
-        return null;
+    public Universite desaffecterFoyerAUniversite( long idUniversite) {
+        Universite universite = universiteRepository.findById(idUniversite).orElse(null);
+       // Foyer foyer = foyerRepository.findById(idFoyer).orElse(null);
+        universite.setFoyer(null);
+        return  universiteRepository.save(universite);
     }
 
     @Override
     public Universite affecterFoyerAUniversite(long idFoyer, String nomUniversite) {
-        // logique pour affecter un foyer
-        return null;
+        Foyer foyer = foyerRepository.findById(idFoyer).orElse(null);
+        Universite universite = universiteRepository.findByNomUniversiteLike(nomUniversite);
+        universite.setFoyer(foyer);
+        return universiteRepository.save(universite);
+
     }
 }

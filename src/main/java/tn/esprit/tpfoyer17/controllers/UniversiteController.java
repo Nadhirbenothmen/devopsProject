@@ -14,38 +14,35 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequestMapping("api/universites")
+@CrossOrigin(origins = "http://localhost:4200")
+
+@RequestMapping("api/univeristes")
 public class UniversiteController {
-
-    IUniversiteService universiteService; // Ajout de la dépendance
-
     @GetMapping("/retrieveAllUniversities")
     public List<Universite> retrieveAllUniversities() {
         return universiteService.retrieveAllUniversities();
     }
-
-    @PostMapping("/addUniversity")
+@PostMapping("/addUniversity")
     public Universite addUniversity(@RequestBody Universite u) {
         return universiteService.addUniversity(u);
     }
-
-    @PutMapping("/updateUniversity/{idUniversite}")
-    public Universite updateUniversity(@PathVariable long idUniversite, @RequestBody Universite u) {
-        return universiteService.updateUniversity(idUniversite, u);
+@PutMapping("/updateUniversity")
+    public Universite updateUniversity(@RequestBody Universite u) {
+        return universiteService.updateUniversity(u);
     }
-
-    @GetMapping("/retrieveUniversity/{idUniversity}")
+@GetMapping("/retrieveUniversity/{idUniversity}")
     public Universite retrieveUniversity(@PathVariable("idUniversity") long idUniversity) {
         return universiteService.retrieveUniversity(idUniversity);
     }
-
-    @PutMapping("/affecterFoyerAUniversite/{idFoyer}/{nomUniversite}")
+@PutMapping("/affecterFoyerAUniversite/{idFoyer}/{nomUniversite}")
     public Universite affecterFoyerAUniversite(@PathVariable("idFoyer") long idFoyer, @PathVariable("nomUniversite") String nomUniversite) {
         return universiteService.affecterFoyerAUniversite(idFoyer, nomUniversite);
     }
-
-    @PutMapping("/desaffecterFoyerAUniversite/{idUniversite}")
-    public Universite desaffecterFoyerAUniversite(@PathVariable("idUniversite") long idUniversite) {
-        return universiteService.desaffecterFoyerAUniversite(idUniversite);
+@PutMapping("/desaffecterFoyerAUniversite/{idUniversite}")
+    public Universite desaffecterFoyerAUniversite(
+                                                  @PathVariable("idUniversite") long idUniversite) {
+        return universiteService.desaffecterFoyerAUniversite( idUniversite);
     }
+
+    IUniversiteService universiteService;
 }
