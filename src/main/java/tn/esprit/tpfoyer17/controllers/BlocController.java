@@ -36,7 +36,7 @@ public class BlocController {
     }
 
 
-    @GetMapping("/retrieveBloc/{idBloc}")
+    @G<etMapping("/retrieveBloc/{idBloc}")
     public Bloc retrieveBloc(@PathVariable("idBloc") long idBloc) {
         return blocService.retrieveBloc(idBloc);
     }
