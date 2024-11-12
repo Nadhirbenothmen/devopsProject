@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,6 +25,7 @@ public class Reservation implements Serializable {
    // @GeneratedValue(strategy = GenerationType.SEQUENCE)
     String idReservation;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate anneeUniversitaire;
 
     boolean estValide;

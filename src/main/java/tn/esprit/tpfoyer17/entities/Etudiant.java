@@ -1,5 +1,6 @@
 package tn.esprit.tpfoyer17.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,7 +30,7 @@ public class Etudiant implements Serializable {
     String prenomEtudiant;
 
     long cinEtudiant;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     Date dateNaissance;
 
     @ToString.Exclude
