@@ -1,33 +1,51 @@
-version: "3.7"
 services:
-  tpfoyer17:
-    image: moetezbellah/tpfoyer17:58
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dbmysql:3306/tpFoyer17?createDatabaseIfNotExist=true&userSSL=false
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root
+  mysqldb:
+    image: 'mysql:8.0'
     restart: unless-stopped
-    depends_on:
-      - dbmysql
-
-  dbmysql:
-    image: "mysql:5.6"
-    container_name: dbmysql
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      MYSQL_DATABASE: tpFoyer17
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     ports:
       - "3306:3306"
-    restart: unless-stopped
+    networks:
+      - mynetwork
     volumes:
       - db:/var/lib/mysql
 
+  spring-app:
+    image: moetezbellah/tpfoyer17:58
+
+    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysqldb:3306/tpFoyer17?createDatabaseIfNotExist=true&useUnicode=true"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: ""
+      spring.jpa.hibernate.ddl-auto: "update"
+      spring.jpa.properties.hibernate.dialect: "org.hibernate.dialect.MySQL8Dialect"
+    ports:
+      - "8082:8082"  # Mappe le port 8287 interne pour Spring Boot
+    depends_on:
+      - mysqldb
+    networks:
+      - mynetwork
+
   angular-app:
     image: moetezbellah/frontfoyer:v1
+    restart: unless-stopped
     ports:
-      - "4200:80"
-    restart: always
+      - "4200:80"  # Mappe le port 80 interne de Nginx à 8288 en externe pour Angular
+    networks:
+      - mynetwork
+    depends_on:
+      - spring-app
+
+networks:
+  mynetwork:
+    driver: bridge
 
 volumes:
   db:
+
+
+
+
