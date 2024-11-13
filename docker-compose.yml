@@ -24,7 +24,7 @@ services:
       - db:/var/lib/mysql
 
   angular-app:
-    image: moetezbellah/frontfoyer:v4
+    image: moetezbellah/frontfoyer:v5
     ports:
       - "4200:80"
     restart: always
