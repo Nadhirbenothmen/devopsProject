@@ -2,7 +2,7 @@ version: "3.7"
 services:
   Tpfoyer:
     container_name: tpfoyer
-    image: moetezbellah/tpfoyer17:41  # Utilisation de l'image Nexus avec version "40"
+    image: 192.168.1.6:8081/repository/v2/moetezbellah/tpfoyer17:42  # Utilisation de l'image Nexus avec version "40"
     ports:
       - "8082:8082"
     environment:
