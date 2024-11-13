@@ -25,7 +25,7 @@ services:
       - db:/var/lib/mysql
 
   angular-app:
-    image: moetezbellah/frontfoyer:v5
+    image: moetezbellah/foyerangular:v1
     container_name: angular-app
     ports:
       - "4200:80"
