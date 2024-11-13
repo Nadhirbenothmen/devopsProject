@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   tpfoyer17:
-    image: moetezbellah/tpfoyer17:58
+    image: moetezbellah/tpfoyer17:70
     ports:
       - "8082:8082"
     environment:
