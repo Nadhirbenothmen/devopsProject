@@ -11,8 +11,6 @@ services:
     restart: unless-stopped
     depends_on:
       - dbmysql
-    networks:
-      - mynetwork
 
   dbmysql:
     image: "mysql:5.6"
@@ -30,10 +28,6 @@ services:
     ports:
       - "4200:80"
     restart: always
-    networks:
-      - mynetwork
-networks:
-  mynetwork:
-    driver: bridge
+
 volumes:
   db:
