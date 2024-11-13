@@ -16,6 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@CrossOrigin(origins = "http://localhost:4200")
+
 @RequestMapping("api/reservations")
 public class ReservationController {
     @GetMapping("/retrieveAllReservation")

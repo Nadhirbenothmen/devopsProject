@@ -10,6 +10,7 @@ import tn.esprit.tpfoyer17.repositories.BlocRepository;
 import tn.esprit.tpfoyer17.services.interfaces.IBlocService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -30,6 +31,7 @@ public class BlocService implements IBlocService {
 
     @Override
     public Bloc addBloc(Bloc bloc) {
+
         return blocRepository.save(bloc);
     }
 
