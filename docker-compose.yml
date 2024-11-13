@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  Kaddem:
+  Tpfoyer:
     container_name: tpfoyer
     image: 192.168.1.6:8081/repository/v2/moetezbellah/tpfoyer17:40  # Utilisation de l'image Nexus avec version "40"
     ports:
